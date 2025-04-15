@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackShield - Cybersecurity Solution</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: transform 0.3s;
+        }
+        .cyber-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #00ff88;
+            margin-bottom: 1rem;
+        }
+        .chatbot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00ff88;
+            color: #1a1a2e;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(12px);
+            display: none;
+        }
+        .stat-card {
+            background: linear-gradient(45deg, #00ff88, #00b4d8);
+            color: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="container text-center py-5">
+        <h1 class="display-4 glow-text" data-aos="fade-down"><i class="fas fa-shield-alt"></i> HackShield</h1>
+        <p class="lead" data-aos="fade-up">Advanced Cybersecurity Protection Suite</p>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="container py-4">
+        <div class="row text-center">
+            <div class="col-md-3" data-aos="zoom-in">
+                <div class="stat-card">
+                    <h3>1M+</h3>
+                    <p>Malware Detected</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-card">
+                    <h3>99.9%</h3>
+                    <p>Detection Rate</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-card">
+                    <h3>24/7</h3>
+                    <p>Threat Monitoring</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-card">
+                    <h3>AI-Powered</h3>
+                    <p>Protection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container py-5">
+        <div class="row">
+            <div class="col-md-4 mb-4" data-aos="fade-right">
+                <a href="{% url 'analyze' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-file-shield feature-icon"></i>
+                        <h4 class="glow-text">File Analysis</h4>
+                        <p>Advanced malware detection using heuristic analysis and machine learning</p>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-4 mb-4" data-aos="fade-up">
+                <a href="{% url 'network' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-network-wired feature-icon"></i>
+                        <h4>Network Protection</h4>
+                        <p>Real-time network monitoring and intrusion detection system</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4 mb-4" data-aos="fade-left">
+                <a href="{% url ''}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-robot feature-icon"></i>
+                        <h4>AI Threat Detection</h4>
+                        <p>Next-generation AI-powered threat prediction system</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot -->
+    <div class="chatbot-btn" onclick="toggleChat()">
+        <i class="fas fa-robot fa-2x"></i>
+    </div>
+    <div class="chat-window" id="chatWindow">
+        <div class="card-header bg-dark">CyberSec Assistant</div>
+        <div class="card-body" id="chatBody" style="height: 300px; overflow-y: auto;"></div>
+        <div class="card-footer">
+            <input type="text" class="form-control" id="userInput" placeholder="Ask about cybersecurity...">
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({duration: 1000});
+        
+        // Chatbot functionality
+        function toggleChat() {
+            const chatWindow = document.getElementById('chatWindow');
+            chatWindow.style.display = chatWindow.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function handleUserInput() {
+            const userInput = $('#userInput').val();
+            $('#chatBody').append(`<div class="text-end mb-2">You: ${userInput}</div>`);
+            $('#userInput').val('');
+            
+            // Mock AI Response (Replace with actual API call)
+            const responses = {
+                "hi": "Hello! I'm your cybersecurity assistant. How can I help?",
+                "phishing": "Phishing attacks use fake communications to trick victims. Always verify sender addresses!",
+                "malware": "Malware includes viruses, worms, and ransomware. Keep your software updated!",
+                "password": "Use strong passwords with mix of characters. Enable 2FA whenever possible.",
+                "default": "I'm here to help with cybersecurity questions. Ask about threats, prevention, or best practices!"
+            };
+
+            const answer = responses[userInput.toLowerCase()] || responses['default'];
+            $('#chatBody').append(`<div class="text-start mb-2">Bot: ${answer}</div>`);
+        }
+
+        $('#userInput').keypress(e => {
+            if(e.which === 13) handleUserInput();
+        });
+
+        // Animated stats
+        $('.stat-card h3').each(function() {
+            $(this).prop('Counter',0).animate({
+                Counter: $(this).text()
+            }, {
+                duration: 2000,
+                easing: 'swing',
+                step: function(now) {
+                    $(this).text(Math.ceil(now));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

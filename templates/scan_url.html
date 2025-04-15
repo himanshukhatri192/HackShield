@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackShield Security Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --cyber-teal: #00ff88;
+            --cyber-dark: #1a1a2e;
+            --cyber-darker: #16213e;
+            --cyber-danger: #e94560;
+            --cyber-warning: #ff9f43;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--cyber-dark), var(--cyber-darker));
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .navbar-cyber {
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: all 0.3s;
+            position: relative;
+            margin: 0 10px;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--cyber-teal) !important;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--cyber-teal);
+            border-radius: 2px;
+        }
+        
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyber-teal);
+            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.15);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .btn-cyber {
+            background: linear-gradient(45deg, var(--cyber-teal), #00b4d8);
+            border: none;
+            color: var(--cyber-dark);
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-cyber:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+        
+        .btn-cyber-outline {
+            background: transparent;
+            border: 2px solid var(--cyber-teal);
+            color: var(--cyber-teal);
+        }
+        
+        .btn-cyber-outline:hover {
+            background: var(--cyber-teal);
+            color: var(--cyber-dark);
+        }
+        
+        .feature-icon {
+            font-size: 4rem;
+            color: var(--cyber-teal);
+            margin-bottom: 1rem;
+        }
+        
+        .file-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed var(--cyber-teal);
+            padding: 3rem;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input:hover {
+            background: rgba(0, 255, 136, 0.05);
+            border-color: #00b4d8;
+        }
+        
+        .key-display {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            word-break: break-all;
+            font-family: monospace;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: var(--cyber-teal);
+            color: var(--cyber-dark);
+        }
+        
+        .progress-cyber {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .progress-bar-cyber {
+            background: linear-gradient(90deg, var(--cyber-teal), #00b4d8);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--cyber-teal);
+            color: var(--cyber-teal);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .url-result-card {
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        
+        .url-safe {
+            border-left-color: var(--cyber-teal);
+        }
+        
+        .url-suspicious {
+            border-left-color: var(--cyber-warning);
+        }
+        
+        .url-danger {
+            border-left-color: var(--cyber-danger);
+        }
+        
+        .alert-proxy {
+            background: rgba(255, 159, 67, 0.2);
+            border-left: 4px solid var(--cyber-warning);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cyber">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <i class="fas fa-shield-alt me-2"></i>
+                <span>HACKSHIELD</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#encrypt"><i class="fas fa-lock me-1"></i> Encryption</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#urlcheck"><i class="fas fa-link me-1"></i> URL Check</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5" id="home">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="cyber-card" data-aos="zoom-in">
+                    <i class="fas fa-shield-virus feature-icon"></i>
+                    <h1 class="glow-text">HackShield Security Suite</h1>
+                    <p class="lead">Comprehensive cybersecurity tools in one platform</p>
+                    
+                    <div class="row mt-5">
+                        <div class="col-md-4 mb-4">
+                            <div class="cyber-card h-100">
+                                <i class="fas fa-lock feature-icon"></i>
+                                <h4>File Encryption</h4>
+                                <p>Secure your files with military-grade AES-256 encryption</p>
+                                <a href="#encrypt" class="btn btn-cyber-outline">Secure Files</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="cyber-card h-100">
+                                <i class="fas fa-link feature-icon"></i>
+                                <h4>URL Checker</h4>
+                                <p>Verify website safety and detect proxy/VPN masking</p>
+                                <a href="#urlcheck" class="btn btn-cyber-outline">Check URLs</a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-4">
+                            <div class="cyber-card h-100">
+                                <i class="fas fa-shield-alt feature-icon"></i>
+                                <h4>Security Tools</h4>
+                                <p>Advanced protection against cyber threats</p>
+                                <a href="#urlcheck" class="btn btn-cyber-outline">Explore Tools</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Encryption Section -->
+    <div class="container py-5" id="encrypt">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="cyber-card" data-aos="zoom-in">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h1 class="glow-text">File Encryption Suite</h1>
+                        <p class="text-muted">Secure your files with military-grade encryption</p>
+                    </div>
+                    
+                    <div class="tabs">
+                        <div class="tab active" data-tab="encrypt">Encrypt</div>
+                        <div class="tab" data-tab="decrypt">Decrypt</div>
+                    </div>
+                    
+                    <!-- Encrypt Tab Content -->
+                    <div class="tab-content active" id="encrypt-tab">
+                        <form id="encryptForm">
+                            <div class="mb-4">
+                                <label class="file-input w-100">
+                                    <input type="file" id="encryptFile" name="file" required class="d-none" accept="*">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                    <h4 id="encryptFileName">Drag & Drop or Click to Upload</h4>
+                                    <p class="text-muted">Maximum file size: 100MB</p>
+                                </label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="strongEncryption" name="strongEncryption" checked>
+                                    <label class="form-check-label" for="strongEncryption">
+                                        AES-256 Encryption
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="btn-cyber" id="encryptButton">
+                                    <i class="fas fa-lock me-2"></i> Encrypt File
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div id="encryptProgress" class="mt-4 d-none">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Encrypting file...</span>
+                                <span id="encryptProgressPercent">0%</span>
+                            </div>
+                            <div class="progress progress-cyber">
+                                <div id="encryptProgressBar" class="progress-bar progress-bar-cyber" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="encryptResult" class="mt-4 d-none">
+                            <div class="cyber-card">
+                                <h4 class="glow-text mb-3"><i class="fas fa-check-circle me-2"></i> Encryption Successful</h4>
+                                <div class="mb-3">
+                                    <label>Encrypted File:</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-archive me-2"></i>
+                                        <span id="encryptedFileName"></span>
+                                        <a href="#" id="downloadEncrypted" class="btn btn-cyber-outline btn-sm ms-auto" download>
+                                            <i class="fas fa-download me-1"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label>Your Encryption Key:</label>
+                                    <div class="key-display">
+                                        <button class="copy-btn" onclick="copyToClipboard('encryptionKey')">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                        <span id="encryptionKey"></span>
+                                    </div>
+                                    <small class="text-danger">Warning: Store this key securely! You'll need it to decrypt the file.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Decrypt Tab Content -->
+                    <div class="tab-content" id="decrypt-tab">
+                        <form id="decryptForm">
+                            <div class="mb-4">
+                                <label class="file-input w-100">
+                                    <input type="file" id="decryptFile" name="file" required class="d-none" accept="*">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                                    <h4 id="decryptFileName">Drag & Drop or Click to Upload</h4>
+                                    <p class="text-muted">Select your encrypted file</p>
+                                </label>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="decryptionKey" class="form-label">Decryption Key</label>
+                                <input type="text" class="form-control bg-transparent text-white" id="decryptionKey" 
+                                       name="key" placeholder="Enter the decryption key" required>
+                            </div>
+                            
+                            <button type="submit" class="btn-cyber w-100" id="decryptButton">
+                                <i class="fas fa-unlock me-2"></i> Decrypt File
+                            </button>
+                        </form>
+                        
+                        <div id="decryptProgress" class="mt-4 d-none">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Decrypting file...</span>
+                                <span id="decryptProgressPercent">0%</span>
+                            </div>
+                            <div class="progress progress-cyber">
+                                <div id="decryptProgressBar" class="progress-bar progress-bar-cyber" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="decryptResult" class="mt-4 d-none">
+                            <div class="cyber-card">
+                                <h4 class="glow-text mb-3"><i class="fas fa-check-circle me-2"></i> Decryption Successful</h4>
+                                <div class="mb-3">
+                                    <label>Decrypted File:</label>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file me-2"></i>
+                                        <span id="decryptedFileName"></span>
+                                        <a href="#" id="downloadDecrypted" class="btn btn-cyber-outline btn-sm ms-auto" download>
+                                            <i class="fas fa-download me-1"></i> Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Check Section -->
+    <div class="container py-5" id="urlcheck">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="cyber-card" data-aos="zoom-in">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-link feature-icon"></i>
+                        <h1 class="glow-text">URL Safety Checker</h1>
+                        <p class="text-muted">Verify website safety and detect proxy/VPN masking</p>
+                    </div>
+                    
+                    <form id="urlCheckForm">
+                        <div class="mb-4">
+                            <label for="urlToCheck" class="form-label">Enter URL to Check:</label>
+                            <input type="url" class="form-control bg-transparent text-white" id="urlToCheck" 
+                                   name="url" placeholder="https://example.com" required>
+                        </div>
+                        
+                        <button type="submit" class="btn-cyber w-100" id="checkUrlButton">
+                            <i class="fas fa-search me-2"></i> Check URL Safety
+                        </button>
+                    </form>
+                    
+                    <div id="urlCheckProgress" class="mt-4 d-none">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Analyzing URL...</span>
+                            <span id="urlCheckProgressPercent">0%</span>
+                        </div>
+                        <div class="progress progress-cyber">
+                            <div id="urlCheckProgressBar" class="progress-bar progress-bar-cyber" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="urlCheckResult" class="mt-4 d-none">
+                        <div class="cyber-card url-result-card" id="urlResultCard">
+                            <h4 class="glow-text mb-3"><i class="fas fa-globe me-2"></i> URL Analysis Result</h4>
+                            <div class="mb-3">
+                                <label>URL:</label>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-link me-2"></i>
+                                    <span id="checkedUrl" class="text-break"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Safety Status:</label>
+                                <div>
+                                    <span id="urlSafetyStatus" class="badge"></span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Details:</label>
+                                <ul id="urlCheckDetails" class="list-unstyled">
+                                    <!-- Details will be added here -->
+                                </ul>
+                            </div>
+                            <div id="proxyWarning" class="alert alert-proxy d-none mt-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Proxy/VPN Detected!</strong> This URL may be masking its true location.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-muted">
+        <div class="container">
+            <p class="mb-1">© 2023 HackShield Security Suite</p>
+            <p class="mb-0">Comprehensive Cybersecurity Protection</p>
+        </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Initialize animations
+        AOS.init({ duration: 1000 });
+        
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.dataset.tab;
+                
+                // Remove active class from all tabs and contents
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // File input handling for encrypt
+        document.getElementById('encryptFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || "Drag & Drop or Click to Upload";
+            document.getElementById('encryptFileName').innerHTML = `
+                <i class="fas fa-file-alt fa-2x mb-2"></i><br>
+                ${fileName}
+            `;
+        });
+        
+        // File input handling for decrypt
+        document.getElementById('decryptFile').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name || "Drag & Drop or Click to Upload";
+            document.getElementById('decryptFileName').innerHTML = `
+                <i class="fas fa-file-alt fa-2x mb-2"></i><br>
+                ${fileName}
+            `;
+        });
+        
+        // Copy to clipboard function
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Copied!',
+                    text: 'Key copied to clipboard',
+                    timer: 1000,
+                    showConfirmButton: false,
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+            });
+        }
+        
+        // Encryption form handling
+        document.getElementById('encryptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('encryptFile');
+            if (!fileInput.files.length) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please select a file to encrypt',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('encryptProgress').classList.remove('d-none');
+            document.getElementById('encryptButton').disabled = true;
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('encryptProgressBar').style.width = `${progress}%`;
+                document.getElementById('encryptProgressPercent').textContent = `${Math.floor(progress)}%`;
+                
+                if (progress === 100) {
+                    clearInterval(interval);
+                    completeEncryption();
+                }
+            }, 300);
+        });
+        
+        function completeEncryption() {
+            // Get the uploaded file
+            const fileInput = document.getElementById('encryptFile');
+            const file = fileInput.files[0];
+            const fileName = file.name;
+            const encryptedFileName = `encrypted_${fileName}`;
+            
+            // Set the displayed file name
+            document.getElementById('encryptedFileName').textContent = encryptedFileName;
+            
+            // Generate a random key (in a real app, this would come from your backend)
+            const encryptionKey = `HShield-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
+            document.getElementById('encryptionKey').textContent = encryptionKey;
+            
+            // Create download link for the encrypted file
+            const downloadLink = document.getElementById('downloadEncrypted');
+            
+            // In a real application, you would get the encrypted file from your backend
+            // For this demo, we'll create a dummy encrypted file
+            const encryptedContent = `This is a simulated encrypted version of: ${fileName}\n\n` +
+                                   `Encryption Key: ${encryptionKey}\n\n` +
+                                   `Actual encryption would happen on the server side.`;
+            
+            // Create a Blob with the encrypted content
+            const blob = new Blob([encryptedContent], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            // Set the download attributes
+            downloadLink.href = url;
+            downloadLink.download = encryptedFileName;
+            downloadLink.onclick = () => {
+                setTimeout(() => {
+                    URL.revokeObjectURL(url); // Clean up
+                }, 100);
+            };
+            
+            // Hide progress, show result
+            document.getElementById('encryptProgress').classList.add('d-none');
+            document.getElementById('encryptResult').classList.remove('d-none');
+            document.getElementById('encryptButton').disabled = false;
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Encryption Complete!',
+                text: 'Your file has been securely encrypted',
+                confirmButtonColor: '#00ff88',
+                background: '#1a1a2e',
+                color: 'white'
+            });
+        }
+
+        // Decryption form handling
+        document.getElementById('decryptForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('decryptFile');
+            const keyInput = document.getElementById('decryptionKey');
+            
+            if (!fileInput.files.length) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please select a file to decrypt',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                return;
+            }
+            
+            if (!keyInput.value) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter the decryption key',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('decryptProgress').classList.remove('d-none');
+            document.getElementById('decryptButton').disabled = true;
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('decryptProgressBar').style.width = `${progress}%`;
+                document.getElementById('decryptProgressPercent').textContent = `${Math.floor(progress)}%`;
+                
+                if (progress === 100) {
+                    clearInterval(interval);
+                    completeDecryption();
+                }
+            }, 300);
+        });
+        
+        function completeDecryption() {
+            // Get the uploaded file info
+            const fileInput = document.getElementById('decryptFile');
+            const file = fileInput.files[0];
+            const fileName = file.name;
+            const decryptedFileName = fileName.startsWith('encrypted_') 
+                ? fileName.replace('encrypted_', 'decrypted_') 
+                : `decrypted_${fileName}`;
+            
+            // Set the displayed file name
+            document.getElementById('decryptedFileName').textContent = decryptedFileName;
+            
+            // Create download link for the decrypted file
+            const downloadLink = document.getElementById('downloadDecrypted');
+            
+            // In a real application, you would get the decrypted file from your backend
+            // For this demo, we'll create a dummy decrypted file
+            const decryptedContent = `This is a simulated decrypted version of: ${fileName}\n\n` +
+                                   `Original content would be restored here after proper decryption.`;
+            
+            // Create a Blob with the decrypted content
+            const blob = new Blob([decryptedContent], { type: 'application/octet-stream' });
+            const url = URL.createObjectURL(blob);
+            
+            // Set the download attributes
+            downloadLink.href = url;
+            downloadLink.download = decryptedFileName;
+            downloadLink.onclick = () => {
+                setTimeout(() => {
+                    URL.revokeObjectURL(url); // Clean up
+                }, 100);
+            };
+            
+            // Hide progress, show result
+            document.getElementById('decryptProgress').classList.add('d-none');
+            document.getElementById('decryptResult').classList.remove('d-none');
+            document.getElementById('decryptButton').disabled = false;
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Decryption Complete!',
+                text: 'Your file has been successfully decrypted',
+                confirmButtonColor: '#00ff88',
+                background: '#1a1a2e',
+                color: 'white'
+            });
+        }
+
+        // URL Check Form Handling
+        document.getElementById('urlCheckForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('urlToCheck').value.trim();
+            if (!url) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Please enter a URL to check',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                return;
+            }
+            
+            // Show progress
+            document.getElementById('urlCheckProgress').classList.remove('d-none');
+            document.getElementById('checkUrlButton').disabled = true;
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('urlCheckProgressBar').style.width = `${progress}%`;
+                document.getElementById('urlCheckProgressPercent').textContent = `${Math.floor(progress)}%`;
+                
+                if (progress === 100) {
+                    clearInterval(interval);
+                    checkUrlSafety(url);
+                }
+            }, 300);
+        });
+        
+        function checkUrlSafety(url) {
+            // In a real application, this would be an AJAX call to your backend
+            // For this demo, we'll simulate the response
+            
+            // Simulate API delay
+            setTimeout(() => {
+                // Hide progress
+                document.getElementById('urlCheckProgress').classList.add('d-none');
+                document.getElementById('checkUrlButton').disabled = false;
+                
+                // Sample results - in a real app this would come from your backend
+                const isSafe = Math.random() > 0.3; // 70% chance of being safe
+                const isProxy = Math.random() > 0.7; // 30% chance of being proxy
+                const domainAgeDays = Math.floor(Math.random() * 1000);
+                const blacklisted = isSafe ? [] : ['phishbase.org', 'malwaredb.com'];
+                
+                // Display results
+                document.getElementById('checkedUrl').textContent = url;
+                
+                const statusBadge = document.getElementById('urlSafetyStatus');
+                let safetyStatus, badgeClass, cardClass;
+                
+                if (isSafe && !isProxy) {
+                    safetyStatus = "Safe";
+                    badgeClass = "bg-success";
+                    cardClass = "url-safe";
+                } else if (isProxy) {
+                    safetyStatus = "Suspicious (Proxy)";
+                    badgeClass = "bg-warning";
+                    cardClass = "url-suspicious";
+                } else {
+                    safetyStatus = "Unsafe";
+                    badgeClass = "bg-danger";
+                    cardClass = "url-danger";
+                }
+                
+                statusBadge.textContent = safetyStatus;
+                statusBadge.className = `badge ${badgeClass}`;
+                
+                const resultCard = document.getElementById('urlResultCard');
+                resultCard.className = `cyber-card url-result-card ${cardClass}`;
+                
+                const detailsList = document.getElementById('urlCheckDetails');
+                detailsList.innerHTML = '';
+                
+                // Add details
+                addDetail(detailsList, 'Domain', extractDomain(url));
+                addDetail(detailsList, 'Domain Age', `${domainAgeDays} days`);
+                addDetail(detailsList, 'SSL Secured', isSafe ? 'Yes' : 'No');
+                addDetail(detailsList, 'Blacklisted In', blacklisted.length ? blacklisted.join(', ') : 'None');
+                
+                if (isProxy) {
+                    document.getElementById('proxyWarning').classList.remove('d-none');
+                } else {
+                    document.getElementById('proxyWarning').classList.add('d-none');
+                }
+                
+                // Show results
+                document.getElementById('urlCheckResult').classList.remove('d-none');
+                
+            }, 1500);
+        }
+        
+        function extractDomain(url) {
+            try {
+                const domain = new URL(url).hostname;
+                return domain.startsWith('www.') ? domain.substring(4) : domain;
+            } catch {
+                return url;
+            }
+        }
+        
+        function addDetail(list, label, value) {
+            const item = document.createElement('li');
+            item.className = 'mb-2';
+            item.innerHTML = `<strong>${label}:</strong> ${value}`;
+            list.appendChild(item);
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

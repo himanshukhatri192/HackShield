@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced File Analysis - HackShield</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        :root {
+            --cyber-teal: #00ff88;
+            --cyber-dark: #1a1a2e;
+            --cyber-darker: #16213e;
+            --cyber-danger: #e94560;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--cyber-dark), var(--cyber-darker));
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+        }
+        
+        .navbar-cyber {
+            background: rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--cyber-teal) !important;
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--cyber-teal);
+        }
+        
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: all 0.3s;
+            padding: 2rem;
+            margin: 1rem 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cyber-teal);
+            box-shadow: 0 12px 40px rgba(0, 255, 136, 0.15);
+        }
+        
+        .file-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed var(--cyber-teal);
+            padding: 3rem;
+            text-align: center;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .file-input:hover {
+            background: rgba(0, 255, 136, 0.05);
+            border-color: #00b4d8;
+        }
+        
+        .btn-cyber {
+            background: linear-gradient(45deg, var(--cyber-teal), #00b4d8);
+            border: none;
+            color: var(--cyber-dark);
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-cyber:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+        
+        .threat-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .threat-critical {
+            background: linear-gradient(45deg, #ff0000, #ff6b6b);
+        }
+        
+        .threat-high {
+            background: linear-gradient(45deg, #ff6b00, #ffa502);
+        }
+        
+        .threat-medium {
+            background: linear-gradient(45deg, #ffcc00, #ffdd59);
+            color: var(--cyber-dark);
+        }
+        
+        .threat-low {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: var(--cyber-dark);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+        
+        .progress-cyber {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .progress-bar-cyber {
+            background: linear-gradient(90deg, var(--cyber-teal), #00b4d8);
+        }
+        
+        .scan-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .file-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: var(--cyber-teal);
+        }
+        
+        .alert-danger {
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid var(--cyber-danger);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-cyber">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fas fa-shield-alt me-2"></i>
+                <span class="fw-bold">HackShield</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/analyze/"><i class="fas fa-file-shield me-1"></i> File Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/network/"><i class="fas fa-network-wired me-1"></i> Network Scan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/encrypt/"><i class="fas fa-lock me-1"></i> Encryption Tools</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports/"><i class="fas fa-chart-bar me-1"></i> Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="cyber-card" data-aos="zoom-in">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-file-shield file-icon"></i>
+                        <h1 class="glow-text">Advanced File Analysis</h1>
+                        <p class="text-muted">Scan files for malware, viruses, and suspicious content</p>
+                    </div>
+                    
+                    <form id="analyzeForm" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label class="file-input w-100" id="fileInputLabel">
+                            <input type="file" id="file" name="file" required class="d-none" accept=".exe,.dll,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.js,.py,.zip,.rar">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                            <h4 id="fileNameDisplay">Drag & Drop or Click to Upload</h4>
+                            <p class="text-muted">Supported formats: EXE, DLL, PDF, Office Docs, Scripts, Archives</p>
+                            <p class="text-muted">Max size: 100MB</p>
+                        </label>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="deepScan" name="deepScan" checked>
+                                <label class="form-check-label" for="deepScan">
+                                    Deep Scan (More thorough but slower)
+                                </label>
+                            </div>
+                            
+                            <button type="submit" class="btn-cyber" id="scanButton">
+                                <i class="fas fa-search me-2"></i> Scan File
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div id="scanProgress" class="mt-4 d-none">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Scanning file...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress progress-cyber">
+                            <div id="progressBar" class="progress-bar progress-bar-cyber" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <i class="fas fa-spinner fa-spin scan-animation me-2"></i>
+                            <span>Analyzing file contents...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- <div id="scanResultContainer">
+                    {% if analysis_result %}
+                        {% if analysis_result.status == 'success' %}
+                        <div class="cyber-card mt-4" data-aos="fade-up">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h3 class="glow-text m-0"><i class="fas fa-file-alt me-2"></i> Analysis Report</h3>
+                                <span class="badge threat-{{ analysis_result.threat_level|lower }}">{{ analysis_result.threat_level }}</span>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-borderless text-white">
+                                    <tbody>
+                                        <tr>
+                                            <th width="30%">Filename:</th>
+                                            <td>{{ analysis_result.filename }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>File Size:</th>
+                                            <td>{{ analysis_result.file_size }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>File Type:</th>
+                                            <td>{{ analysis_result.file_type }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Malware Detected:</th>
+                                            <td>
+                                                {% if analysis_result.malware == "Yes" %}
+                                                    <span class="text-danger fw-bold">{{ analysis_result.malware }}</span>
+                                                {% else %}
+                                                    <span class="text-success fw-bold">{{ analysis_result.malware }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Threat Name:</th>
+                                            <td>{{ analysis_result.threat_name|default:"N/A" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Scan Date:</th>
+                                            <td>{{ analysis_result.scan_date }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Recommendations:</th>
+                                            <td>{{ analysis_result.recommendations }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h5><i class="fas fa-chart-pie me-2"></i> Threat Indicators</h5>
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="cyber-card p-3 text-center">
+                                            <h6 class="text-warning">Suspicious Patterns</h6>
+                                            <h4>{{ analysis_result.suspicious_patterns|default:"0" }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="cyber-card p-3 text-center">
+                                            <h6 class="text-danger">Malicious Code</h6>
+                                            <h4>{{ analysis_result.malicious_code|default:"0" }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="cyber-card p-3 text-center">
+                                            <h6 class="text-info">Security Score</h6>
+                                            <h4>{{ analysis_result.security_score|default:"100" }}/100</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                            <div class="alert alert-danger mt-4">
+                                <i class="fas fa-exclamation-triangle me-2"></i> {{ analysis_result.message }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                 -->
+                <div class="cyber-card mt-4" data-aos="fade-up">
+                    <h3 class="glow-text mb-4"><i class="fas fa-lightbulb me-2"></i> Security Tips</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-shield-alt text-success me-2"></i> Best Practices</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Always scan files from unknown sources</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Keep your antivirus software updated</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Use strong passwords for sensitive files</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5><i class="fas fa-exclamation-triangle text-warning me-2"></i> Warning Signs</h5>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> Files from untrusted email attachments</li>
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> Unexpected file extensions (.exe in a document)</li>
+                                    <li class="mb-2"><i class="fas fa-times-circle text-danger me-2"></i> Files with unusually large sizes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-muted">
+        <div class="container">
+            <p class="mb-1">© 2023 HackShield Security Suite</p>
+            <p class="mb-0">Powered by AI Threat Detection Technology</p>
+        </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Initialize animations
+        AOS.init({ duration: 1000 });
+        
+        // File input handling
+        const fileInput = document.getElementById('file');
+        const fileInputLabel = document.getElementById('fileInputLabel');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2); // MB
+                
+                if (file.size > 100 * 1024 * 1024) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'File Too Large',
+                        text: 'Maximum file size is 100MB',
+                        confirmButtonColor: '#e94560',
+                        background: '#1a1a2e',
+                        color: 'white'
+                    });
+                    this.value = '';
+                    fileNameDisplay.innerHTML = 'Drag & Drop or Click to Upload';
+                    return;
+                }
+                
+                fileNameDisplay.innerHTML = `
+                    <i class="fas fa-file-alt fa-2x mb-2"></i><br>
+                    <strong>${file.name}</strong><br>
+                    <small>${fileSize} MB</small>
+                `;
+                
+                fileInputLabel.style.borderColor = '#00ff88';
+            }
+        });
+        
+        // Drag and drop functionality
+        fileInputLabel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileInputLabel.style.background = 'rgba(0, 255, 136, 0.1)';
+        });
+        
+        fileInputLabel.addEventListener('dragleave', () => {
+            fileInputLabel.style.background = 'rgba(255, 255, 255, 0.05)';
+        });
+        
+        fileInputLabel.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInputLabel.style.background = 'rgba(255, 255, 255, 0.05)';
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+        
+        // Form submission with AJAX
+        const analyzeForm = document.getElementById('analyzeForm');
+        const scanProgress = document.getElementById('scanProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const scanButton = document.getElementById('scanButton');
+        const scanResultContainer = document.getElementById('scanResultContainer');
+        
+        analyzeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!fileInput.files.length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No File Selected',
+                    text: 'Please select a file to scan',
+                    confirmButtonColor: '#00ff88',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                return;
+            }
+            
+            // Show progress bar
+            scanProgress.classList.remove('d-none');
+            scanButton.disabled = true;
+            scanButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Scanning...';
+            
+            // Clear previous results
+            scanResultContainer.innerHTML = '';
+            
+            // Create FormData object
+            const formData = new FormData(analyzeForm);
+            
+            // AJAX request
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', analyzeForm.action, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            
+            // Progress tracking
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBar.style.width = percentComplete + '%';
+                    progressPercent.textContent = percentComplete + '%';
+                }
+            };
+            
+            xhr.onload = function() {
+    if (xhr.status === 200) {
+        try {
+            const response = JSON.parse(xhr.responseText);
+            
+            if (response.status === 'error') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Scan Failed',
+                    text: response.message,
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+            } else if (response.status === 'complete') {
+                // Hide progress bar
+                scanProgress.classList.add('d-none');
+                
+                // Create and display the result HTML
+                const result = response.result;
+                const resultHtml = `
+                    <div class="cyber-card mt-4" data-aos="fade-up">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="glow-text m-0"><i class="fas fa-file-alt me-2"></i> Analysis Report</h3>
+                            <span class="badge threat-${result.threat_level.toLowerCase()}">${result.threat_level}</span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-borderless text-white">
+                                <tbody>
+                                    <tr>
+                                        <th width="30%">Filename:</th>
+                                        <td>${result.filename}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>File Size:</th>
+                                        <td>${result.file_size}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>File Type:</th>
+                                        <td>${result.file_type}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Malware Detected:</th>
+                                        <td>
+                                            ${result.malware === "Yes" ? 
+                                                '<span class="text-danger fw-bold">Yes</span>' : 
+                                                '<span class="text-success fw-bold">No</span>'}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Threat Name:</th>
+                                        <td>${result.threat_name || 'N/A'}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Scan Date:</th>
+                                        <td>${result.scan_date}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Recommendations:</th>
+                                        <td>${result.recommendations}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h5><i class="fas fa-chart-pie me-2"></i> Threat Indicators</h5>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="cyber-card p-3 text-center">
+                                        <h6 class="text-warning">Suspicious Patterns</h6>
+                                        <h4>${result.suspicious_patterns || '0'}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="cyber-card p-3 text-center">
+                                        <h6 class="text-danger">Malicious Code</h6>
+                                        <h4>${result.malicious_code || '0'}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="cyber-card p-3 text-center">
+                                        <h6 class="text-info">Security Score</h6>
+                                        <h4>${result.security_score || '100'}/100</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert the result HTML
+                scanResultContainer.innerHTML = resultHtml;
+                
+                // Reinitialize AOS for animations
+                AOS.init();
+                
+                // Show success notification
+                Swal.fire({
+                    icon: result.malware === "Yes" ? 'error' : 'success',
+                    title: result.malware === "Yes" ? 'Threat Detected!' : 'Scan Complete',
+                    text: result.malware === "Yes" ? 
+                        `Threat Level: ${result.threat_level}` : 
+                        'No threats detected',
+                    confirmButtonColor: result.malware === "Yes" ? '#e94560' : '#00ff88',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing response:', e);
+            Swal.fire({
+                icon: 'error',
+                title: 'Scan Failed',
+                text: 'Invalid server response',
+                confirmButtonColor: '#e94560',
+                background: '#1a1a2e',
+                color: 'white'
+            });
+        }
+    } else {
+        // ... (keep the existing error handling code)
+    }
+    
+    scanProgress.classList.add('d-none');
+    scanButton.disabled = false;
+    scanButton.innerHTML = '<i class="fas fa-search me-2"></i> Scan File';
+};
+            
+            xhr.onerror = function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'Could not connect to the server',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                scanProgress.classList.add('d-none');
+                scanButton.disabled = false;
+                scanButton.innerHTML = '<i class="fas fa-search me-2"></i> Scan File';
+            };
+            
+            xhr.send(formData);
+        });
+    </script>
+</body>
+</html>
