@@ -12,6 +12,20 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ
+
+# Initialize environ
+env = environ.Env(
+    # Set default values
+    DEBUG=(bool, False),
+    SECRET_KEY=(str, ''),
+    ALLOWED_HOSTS=(list, []),
+    CELERY_BROKER_URL=(str, 'redis://localhost:6379/0'),
+    CELERY_RESULT_BACKEND=(str, 'redis://localhost:6379/0'),
+)
+
+# Read .env file
+environ.Env.read_env(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,21 +44,32 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 # File storage settings
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-ENCRYPTED_DIR = os.path.join(MEDIA_ROOT, 'encrypted')
-DECRYPTED_DIR = os.path.join(MEDIA_ROOT, 'decrypted')
-KEYS_DIR = os.path.join(MEDIA_ROOT, 'keys')
+ENCRYPTED_DIR = os.path.join(BASE_DIR, 'media/encrypted')
+DECRYPTED_DIR = os.path.join(BASE_DIR, 'media/decrypted')
+KEYS_DIR = os.path.join(BASE_DIR, 'media/keys')
 UPLOADS_DIR = os.path.join(MEDIA_ROOT, 'uploads')
+
+# Ensure directories exist
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+os.makedirs(ENCRYPTED_DIR, exist_ok=True)
+os.makedirs(DECRYPTED_DIR, exist_ok=True)
+os.makedirs(KEYS_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+l%s79o8qd3xp1)=-x7!4q@+sg73$ws__6nn@_rpn)!s01mo1*'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+# Development fallback for allowed hosts
+if DEBUG:
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost','127.0.0.1'])
+else:
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -56,9 +81,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'accounts',
     'main',
     'hackshield',
 ]
+
+# Authentication settings
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/'
 
 
 MIDDLEWARE = [
@@ -143,3 +174,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Celery settings
+CELERY_BROKER_URL = env('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE

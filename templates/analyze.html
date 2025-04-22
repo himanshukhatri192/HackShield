@@ -245,7 +245,8 @@
                     </div>
                 </div>
                 
-                <!-- <div id="scanResultContainer">
+                <!-- Results Container - Now properly uncommented -->
+                <div id="scanResultContainer">
                     {% if analysis_result %}
                         {% if analysis_result.status == 'success' %}
                         <div class="cyber-card mt-4" data-aos="fade-up">
@@ -326,7 +327,7 @@
                         {% endif %}
                     {% endif %}
                 </div>
-                 -->
+                
                 <div class="cyber-card mt-4" data-aos="fade-up">
                     <h3 class="glow-text mb-4"><i class="fas fa-lightbulb me-2"></i> Security Tips</h3>
                     <div class="row">
@@ -476,134 +477,153 @@
             };
             
             xhr.onload = function() {
-    if (xhr.status === 200) {
-        try {
-            const response = JSON.parse(xhr.responseText);
-            
-            if (response.status === 'error') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Scan Failed',
-                    text: response.message,
-                    confirmButtonColor: '#e94560',
-                    background: '#1a1a2e',
-                    color: 'white'
-                });
-            } else if (response.status === 'complete') {
-                // Hide progress bar
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        
+                        if (response.status === 'error') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Scan Failed',
+                                text: response.message,
+                                confirmButtonColor: '#e94560',
+                                background: '#1a1a2e',
+                                color: 'white'
+                            });
+                        } else if (response.status === 'complete') {
+                            // Hide progress bar
+                            scanProgress.classList.add('d-none');
+                            
+                            // Create and display the result HTML
+                            const result = response.result;
+                            const threatLevelClass = result.threat_level.toLowerCase().replace(' ', '-');
+                            
+                            const resultHtml = `
+                                <div class="cyber-card mt-4" data-aos="fade-up">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h3 class="glow-text m-0"><i class="fas fa-file-alt me-2"></i> Analysis Report</h3>
+                                        <span class="badge threat-${threatLevelClass}">${result.threat_level}</span>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless text-white">
+                                            <tbody>
+                                                <tr>
+                                                    <th width="30%">Filename:</th>
+                                                    <td>${result.filename}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>File Size:</th>
+                                                    <td>${result.file_size}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>File Type:</th>
+                                                    <td>${result.file_type}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Malware Detected:</th>
+                                                    <td>
+                                                        ${result.malware === "Yes" ? 
+                                                            '<span class="text-danger fw-bold">Yes</span>' : 
+                                                            '<span class="text-success fw-bold">No</span>'}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Threat Name:</th>
+                                                    <td>${result.threat_name || 'N/A'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Scan Date:</th>
+                                                    <td>${result.scan_date}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Recommendations:</th>
+                                                    <td>${result.recommendations}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h5><i class="fas fa-chart-pie me-2"></i> Threat Indicators</h5>
+                                        <div class="row mt-3">
+                                            <div class="col-md-4">
+                                                <div class="cyber-card p-3 text-center">
+                                                    <h6 class="text-warning">Suspicious Patterns</h6>
+                                                    <h4>${result.suspicious_patterns || '0'}</h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="cyber-card p-3 text-center">
+                                                    <h6 class="text-danger">Malicious Code</h6>
+                                                    <h4>${result.malicious_code || '0'}</h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="cyber-card p-3 text-center">
+                                                    <h6 class="text-info">Security Score</h6>
+                                                    <h4>${result.security_score || '100'}/100</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Insert the result HTML
+                            scanResultContainer.innerHTML = resultHtml;
+                            
+                            // Reinitialize AOS for animations
+                            AOS.init();
+                            
+                            // Show success notification
+                            Swal.fire({
+                                icon: result.malware === "Yes" ? 'error' : 'success',
+                                title: result.malware === "Yes" ? 'Threat Detected!' : 'Scan Complete',
+                                text: result.malware === "Yes" ? 
+                                    `Threat Level: ${result.threat_level}` : 
+                                    'No threats detected',
+                                confirmButtonColor: result.malware === "Yes" ? '#e94560' : '#00ff88',
+                                background: '#1a1a2e',
+                                color: 'white'
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Error parsing response:', e);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Scan Failed',
+                            text: 'Invalid server response',
+                            confirmButtonColor: '#e94560',
+                            background: '#1a1a2e',
+                            color: 'white'
+                        });
+                    }
+                } else {
+                    let errorMessage = 'Server error occurred';
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        if (errorResponse.message) {
+                            errorMessage = errorResponse.message;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Scan Failed',
+                        text: errorMessage,
+                        confirmButtonColor: '#e94560',
+                        background: '#1a1a2e',
+                        color: 'white'
+                    });
+                }
+                
                 scanProgress.classList.add('d-none');
-                
-                // Create and display the result HTML
-                const result = response.result;
-                const resultHtml = `
-                    <div class="cyber-card mt-4" data-aos="fade-up">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h3 class="glow-text m-0"><i class="fas fa-file-alt me-2"></i> Analysis Report</h3>
-                            <span class="badge threat-${result.threat_level.toLowerCase()}">${result.threat_level}</span>
-                        </div>
-                        
-                        <div class="table-responsive">
-                            <table class="table table-borderless text-white">
-                                <tbody>
-                                    <tr>
-                                        <th width="30%">Filename:</th>
-                                        <td>${result.filename}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>File Size:</th>
-                                        <td>${result.file_size}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>File Type:</th>
-                                        <td>${result.file_type}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Malware Detected:</th>
-                                        <td>
-                                            ${result.malware === "Yes" ? 
-                                                '<span class="text-danger fw-bold">Yes</span>' : 
-                                                '<span class="text-success fw-bold">No</span>'}
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>Threat Name:</th>
-                                        <td>${result.threat_name || 'N/A'}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Scan Date:</th>
-                                        <td>${result.scan_date}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Recommendations:</th>
-                                        <td>${result.recommendations}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <h5><i class="fas fa-chart-pie me-2"></i> Threat Indicators</h5>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <div class="cyber-card p-3 text-center">
-                                        <h6 class="text-warning">Suspicious Patterns</h6>
-                                        <h4>${result.suspicious_patterns || '0'}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="cyber-card p-3 text-center">
-                                        <h6 class="text-danger">Malicious Code</h6>
-                                        <h4>${result.malicious_code || '0'}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="cyber-card p-3 text-center">
-                                        <h6 class="text-info">Security Score</h6>
-                                        <h4>${result.security_score || '100'}/100</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Insert the result HTML
-                scanResultContainer.innerHTML = resultHtml;
-                
-                // Reinitialize AOS for animations
-                AOS.init();
-                
-                // Show success notification
-                Swal.fire({
-                    icon: result.malware === "Yes" ? 'error' : 'success',
-                    title: result.malware === "Yes" ? 'Threat Detected!' : 'Scan Complete',
-                    text: result.malware === "Yes" ? 
-                        `Threat Level: ${result.threat_level}` : 
-                        'No threats detected',
-                    confirmButtonColor: result.malware === "Yes" ? '#e94560' : '#00ff88',
-                    background: '#1a1a2e',
-                    color: 'white'
-                });
-            }
-        } catch (e) {
-            console.error('Error parsing response:', e);
-            Swal.fire({
-                icon: 'error',
-                title: 'Scan Failed',
-                text: 'Invalid server response',
-                confirmButtonColor: '#e94560',
-                background: '#1a1a2e',
-                color: 'white'
-            });
-        }
-    } else {
-        // ... (keep the existing error handling code)
-    }
-    
-    scanProgress.classList.add('d-none');
-    scanButton.disabled = false;
-    scanButton.innerHTML = '<i class="fas fa-search me-2"></i> Scan File';
-};
+                scanButton.disabled = false;
+                scanButton.innerHTML = '<i class="fas fa-search me-2"></i> Scan File';
+            };
             
             xhr.onerror = function() {
                 Swal.fire({
