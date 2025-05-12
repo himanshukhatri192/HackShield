@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url
+DATABASES['default'] = dj_database_url.config(conn_max_age=600)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,10 +32,21 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 # File storage settings
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-ENCRYPTED_DIR = os.path.join(MEDIA_ROOT, 'encrypted')
-DECRYPTED_DIR = os.path.join(MEDIA_ROOT, 'decrypted')
-KEYS_DIR = os.path.join(MEDIA_ROOT, 'keys')
+ENCRYPTED_DIR = os.path.join(BASE_DIR, 'media/encrypted')
+DECRYPTED_DIR = os.path.join(BASE_DIR, 'media/decrypted')
+KEYS_DIR = os.path.join(BASE_DIR, 'media/keys')
 UPLOADS_DIR = os.path.join(MEDIA_ROOT, 'uploads')
+
+# Encryption settings
+ENCRYPT_CHUNK_SIZE = 8192
+STREAM_HEADER_SIZE = 4  # bytes for length prefix
+
+# Ensure directories exist
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+os.makedirs(ENCRYPTED_DIR, exist_ok=True)
+os.makedirs(DECRYPTED_DIR, exist_ok=True)
+os.makedirs(KEYS_DIR, exist_ok=True)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -44,9 +57,21 @@ SECRET_KEY = 'django-insecure-+l%s79o8qd3xp1)=-x7!4q@+sg73$ws__6nn@_rpn)!s01mo1*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# settings.py
+CSRF_TRUSTED_ORIGINS = [
+    'https://9022-122-161-69-37.ngrok-free.app',  # Your Ngrok URL
+    'https://*.ngrok-free.app',  # Wildcard for all Ngrok URLs (optional)
+]
 
 
+
+# settings.py
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '9022-122-161-69-37.ngrok-free.app',  # Add your Ngrok URL here
+    '*'  # Wildcard (temporary, for testing)
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -121,6 +146,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/

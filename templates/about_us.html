@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hacshield - Cybersecurity Solutions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #2A5EE8;
+            --dark-bg: #0F172A;
+            --light-text: #F8FAFC;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+        }
+
+        .header {
+            padding: 2rem;
+            text-align: center;
+            border-bottom: 1px solid #1E293B;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+            background: #1E293B;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            margin-top: 2rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid #1E293B;
+            margin-top: 3rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Hacshield</h1>
+        <p>Turning vulnerabilities into strengths</p>
+    </header>
+
+    <main class="content">
+        <section class="section">
+            <h2>About Us</h2>
+            <p>At <strong>Hacshield</strong>, we believe in a world where technology empowers without compromising safety. Born out of a passion for cybersecurity and innovation, our mission is to equip individuals and organizations with cutting-edge tools to defend against evolving digital threats.</p>
+        </section>
+
+        <section class="section">
+            <h2>Our Solutions</h2>
+            <p>From advanced threat detection using AI to real-time protection against ransomware, Hacshield provides comprehensive cybersecurity solutions tailored to your needs. Our platform simplifies compliance and empowers teams through security training.</p>
+        </section>
+
+        <section class="section">
+            <h2>Get Protected</h2>
+            <p>Join us in building a secure future. Click below to get started with Hacshield's protection.</p>
+            <a href="index.html" class="cta-button">Get Started</a>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2023 Hacshield. All rights reserved.</p>
+    </footer>
+</body>
+</html>

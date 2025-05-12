@@ -1,0 +1,8 @@
+user_id,activity,timestamp,duration_minutes,location
+101,login,2025-04-15 09:00:00,0,New York
+102,browse,2025-04-15 09:05:00,15,Los Angeles
+103,upload_file,2025-04-15 09:10:00,5,Chicago
+101,logout,2025-04-15 09:20:00,0,New York
+104,login,2025-04-15 09:30:00,0,Boston
+105,download_file,2025-04-15 09:35:00,3,Dallas
+102,logout,2025-04-15 09:45:00,0,Los Angeles

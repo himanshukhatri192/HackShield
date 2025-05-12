@@ -244,7 +244,7 @@
                     
                     <!-- Encrypt Tab Content -->
                     <div class="tab-content active" id="encrypt-tab">
-                        <form id="encryptForm" action="{% url 'encrypt' %}" method="post" enctype="multipart/form-data">
+                        <form id="encryptForm" action="{% url 'encrypt_file' %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-4">
                                 <label class="file-input w-100">
@@ -308,11 +308,11 @@
                     
                     <!-- Decrypt Tab Content -->
                     <div class="tab-content" id="decrypt-tab">
-                        <form id="decryptForm" action="{% url 'decrypt' %}" method="post" enctype="multipart/form-data">
+                        <form id="decryptForm" action="{% url 'decrypt_file' %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             <div class="mb-4">
                                 <label class="file-input w-100">
-                                    <input type="file" id="decryptFile" name="file" required class="d-none" accept="*">
+                                    <input type="file" id="decryptFile" name="encrypted_file" required class="d-none" accept="*">
                                     <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
                                     <h4 id="decryptFileName">Drag & Drop or Click to Upload</h4>
                                     <p class="text-muted">Select your encrypted file</p>
@@ -322,7 +322,7 @@
                             <div class="mb-3">
                                 <label for="decryptionKey" class="form-label">Decryption Key</label>
                                 <input type="text" class="form-control bg-transparent text-white" id="decryptionKey" 
-                                       name="key" placeholder="Enter the decryption key" required>
+                                       name="encryption_key" placeholder="Enter the decryption key" required>
                             </div>
                             
                             <button type="submit" class="btn-cyber w-100" id="decryptButton">
@@ -448,204 +448,164 @@
             });
         }
         
-        // Simulate encryption process
-        document.getElementById('encryptForm').addEventListener('submit', function(e) {
+        // Real encryption process using server-side encryption
+        document.getElementById('encryptForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
             
             // Show progress
             document.getElementById('encryptProgress').classList.remove('d-none');
             document.getElementById('encryptButton').disabled = true;
             
-            // Simulate progress
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
+            try {
+                // Set initial progress
+                document.getElementById('encryptProgressBar').style.width = '10%';
+                document.getElementById('encryptProgressPercent').textContent = '10%';
                 
-                document.getElementById('encryptProgressBar').style.width = `${progress}%`;
-                document.getElementById('encryptProgressPercent').textContent = `${Math.floor(progress)}%`;
+                // Send the file to the server for encryption
+                const response = await fetch('{% url "encrypt_file" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
-                if (progress === 100) {
-                    clearInterval(interval);
-                    completeEncryption();
+                // Update progress
+                document.getElementById('encryptProgressBar').style.width = '90%';
+                document.getElementById('encryptProgressPercent').textContent = '90%';
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Encryption failed');
                 }
-            }, 300);
+                
+                const result = await response.json();
+                
+                // Complete the progress bar
+                document.getElementById('encryptProgressBar').style.width = '100%';
+                document.getElementById('encryptProgressPercent').textContent = '100%';
+                
+                // Hide progress, show result
+                document.getElementById('encryptProgress').classList.add('d-none');
+                document.getElementById('encryptResult').classList.remove('d-none');
+                document.getElementById('encryptButton').disabled = false;
+                
+                // Set the displayed file name from server response
+                document.getElementById('encryptedFileName').textContent = result.encrypted_file;
+                
+                // Set the encryption key from server response
+                document.getElementById('encryptionKey').textContent = result.encryption_key;
+                
+                // Set the download link from server response
+                const downloadLink = document.getElementById('downloadEncrypted');
+                downloadLink.href = result.download_url;
+                downloadLink.download = result.encrypted_file;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Encryption Complete!',
+                    text: 'Your file has been securely encrypted',
+                    confirmButtonColor: '#00ff88',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                
+            } catch (error) {
+                // Hide progress
+                document.getElementById('encryptProgress').classList.add('d-none');
+                document.getElementById('encryptButton').disabled = false;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Encryption Failed',
+                    text: error.message || 'An error occurred during encryption',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+            }
         });
-        
-        function completeEncryption() {
-            // Hide progress, show result
-            document.getElementById('encryptProgress').classList.add('d-none');
-            document.getElementById('encryptResult').classList.remove('d-none');
-            document.getElementById('encryptButton').disabled = false;
-            
-            // Get the uploaded file
-            const fileInput = document.getElementById('encryptFile');
-            const file = fileInput.files[0];
-            const fileName = file.name;
-            const encryptedFileName = `encrypted_${fileName}`;
-            
-            // Set the displayed file name
-            document.getElementById('encryptedFileName').textContent = encryptedFileName;
-            
-            // Generate a random key (in a real app, this would come from your backend)
-            const encryptionKey = `HShield-${Math.random().toString(36).substring(2, 15)}-${Math.random().toString(36).substring(2, 15)}`;
-            document.getElementById('encryptionKey').textContent = encryptionKey;
-            
-            // Create download link for the encrypted file
-            const downloadLink = document.getElementById('downloadEncrypted');
-            
-            // In a real application, you would get the encrypted file from your backend
-            // For this demo, we'll create a dummy encrypted file
-            const encryptedContent = `This is a simulated encrypted version of: ${fileName}\n\n` +
-                                   `Encryption Key: ${encryptionKey}\n\n` +
-                                   `Actual encryption would happen on the server side.`;
-            
-            // Create a Blob with the encrypted content
-            const blob = new Blob([encryptedContent], { type: 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
-            
-            // Set the download attributes
-            downloadLink.href = url;
-            downloadLink.download = encryptedFileName;
-            downloadLink.onclick = () => {
-                setTimeout(() => {
-                    URL.revokeObjectURL(url); // Clean up
-                }, 100);
-            };
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Encryption Complete!',
-                text: 'Your file has been securely encrypted',
-                confirmButtonColor: '#00ff88',
-                background: '#1a1a2e',
-                color: 'white'
-            });
-        }
 
-        // Decryption form handling
-        document.getElementById('decryptForm').addEventListener('submit', function(e) {
+        // Real decryption process using server-side decryption
+        document.getElementById('decryptForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const form = this;
+            const formData = new FormData(form);
             
             // Show progress
             document.getElementById('decryptProgress').classList.remove('d-none');
             document.getElementById('decryptButton').disabled = true;
             
-            // Simulate progress
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 100) progress = 100;
+            try {
+                // Set initial progress
+                document.getElementById('decryptProgressBar').style.width = '10%';
+                document.getElementById('decryptProgressPercent').textContent = '10%';
                 
-                document.getElementById('decryptProgressBar').style.width = `${progress}%`;
-                document.getElementById('decryptProgressPercent').textContent = `${Math.floor(progress)}%`;
+                // Send the file to the server for decryption
+                const response = await fetch('{% url "decrypt_file" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 
-                if (progress === 100) {
-                    clearInterval(interval);
-                    completeDecryption();
+                // Update progress
+                document.getElementById('decryptProgressBar').style.width = '90%';
+                document.getElementById('decryptProgressPercent').textContent = '90%';
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Decryption failed');
                 }
-            }, 300);
-        });
-        
-        function completeDecryption() {
-            // Hide progress, show result
-            document.getElementById('decryptProgress').classList.add('d-none');
-            document.getElementById('decryptResult').classList.remove('d-none');
-            document.getElementById('decryptButton').disabled = false;
-            
-            // Get the uploaded file info
-            const fileInput = document.getElementById('decryptFile');
-            const file = fileInput.files[0];
-            const fileName = file.name;
-            const decryptedFileName = fileName.startsWith('encrypted_') 
-                ? fileName.replace('encrypted_', 'decrypted_') 
-                : `decrypted_${fileName}`;
-            
-            // Set the displayed file name
-            document.getElementById('decryptedFileName').textContent = decryptedFileName;
-            
-            // Create download link for the decrypted file
-            const downloadLink = document.getElementById('downloadDecrypted');
-            
-            // In a real application, you would get the decrypted file from your backend
-            // For this demo, we'll create a dummy decrypted file
-            const decryptedContent = `This is a simulated decrypted version of: ${fileName}\n\n` +
-                                   `Original content would be restored here after proper decryption.`;
-            
-            // Create a Blob with the decrypted content
-            const blob = new Blob([decryptedContent], { type: 'application/octet-stream' });
-            const url = URL.createObjectURL(blob);
-            
-            // Set the download attributes
-            downloadLink.href = url;
-            downloadLink.download = decryptedFileName;
-            downloadLink.onclick = () => {
-                setTimeout(() => {
-                    URL.revokeObjectURL(url); // Clean up
-                }, 100);
-            };
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Decryption Complete!',
-                text: 'Your file has been successfully decrypted',
-                confirmButtonColor: '#00ff88',
-                background: '#1a1a2e',
-                color: 'white'
-            });
-        }
-
-        // Real implementation would use AJAX like this:
-        /*
-        document.getElementById('decryptForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            // Show progress
-            document.getElementById('decryptProgress').classList.remove('d-none');
-            document.getElementById('decryptButton').disabled = true;
-            
-            fetch("{% url 'decrypt' %}", {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Decryption failed');
-                return response.blob();
-            })
-            .then(blob => {
-                // Create download link
-                const url = URL.createObjectURL(blob);
-                const downloadLink = document.getElementById('downloadDecrypted');
-                const fileName = document.getElementById('decryptFile').files[0].name;
                 
-                downloadLink.href = url;
-                downloadLink.download = fileName.startsWith('encrypted_') 
-                    ? fileName.replace('encrypted_', 'decrypted_') 
-                    : `decrypted_${fileName}`;
-                downloadLink.onclick = () => {
-                    setTimeout(() => {
-                        URL.revokeObjectURL(url);
-                    }, 100);
-                };
+                const result = await response.json();
                 
-                // Show results
+                // Complete the progress bar
+                document.getElementById('decryptProgressBar').style.width = '100%';
+                document.getElementById('decryptProgressPercent').textContent = '100%';
+                
+                // Hide progress, show result
                 document.getElementById('decryptProgress').classList.add('d-none');
                 document.getElementById('decryptResult').classList.remove('d-none');
-            })
-            .catch(error => {
+                document.getElementById('decryptButton').disabled = false;
+                
+                // Set the displayed file name from server response
+                document.getElementById('decryptedFileName').textContent = result.decrypted_file;
+                
+                // Set the download link from server response
+                const downloadLink = document.getElementById('downloadDecrypted');
+                downloadLink.href = result.download_url;
+                downloadLink.download = result.decrypted_file;
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Decryption Complete!',
+                    text: 'Your file has been successfully decrypted',
+                    confirmButtonColor: '#00ff88',
+                    background: '#1a1a2e',
+                    color: 'white'
+                });
+                
+            } catch (error) {
+                // Hide progress
+                document.getElementById('decryptProgress').classList.add('d-none');
+                document.getElementById('decryptButton').disabled = false;
+                
                 Swal.fire({
                     icon: 'error',
                     title: 'Decryption Failed',
-                    text: error.message,
-                    confirmButtonColor: '#e94560'
+                    text: error.message || 'An error occurred during decryption',
+                    confirmButtonColor: '#e94560',
+                    background: '#1a1a2e',
+                    color: 'white'
                 });
-                document.getElementById('decryptProgress').classList.add('d-none');
-                document.getElementById('decryptButton').disabled = false;
-            });
+            }
         });
-        */
     </script>
 </body>
 </html>

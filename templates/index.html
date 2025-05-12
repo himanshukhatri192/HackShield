@@ -105,7 +105,7 @@
     <!-- Features Section -->
     <section class="container py-5">
         <div class="row">
-            <div class="col-md-4 mb-4" data-aos="fade-right">
+            <div class="col-md-3 mb-4" data-aos="fade-right">
                 <a href="{% url 'analyze' %}" class="text-decoration-none text-white">
                     <div class="cyber-card p-4 text-center">
                         <i class="fas fa-file-shield feature-icon"></i>
@@ -115,24 +115,35 @@
                 </a>
             </div>
             
-            <div class="col-md-4 mb-4" data-aos="fade-up">
+            <div class="col-md-3 mb-4" data-aos="fade-up">
                 <a href="{% url 'network' %}" class="text-decoration-none text-white">
                     <div class="cyber-card p-4 text-center">
                         <i class="fas fa-network-wired feature-icon"></i>
-                        <h4>Network Protection</h4>
+                        <h4>Network Scan</h4>
                         <p>Real-time network monitoring and intrusion detection system</p>
                     </div>
                 </a>
             </div>
-            <div class="col-md-4 mb-4" data-aos="fade-left">
-                <a href="{% url ''}" class="text-decoration-none text-white">
+            <div class="col-md-3 mb-4" data-aos="fade-up">
+                <a href="{% url 'encrypt_file' %}" class="text-decoration-none text-white">
                     <div class="cyber-card p-4 text-center">
-                        <i class="fas fa-robot feature-icon"></i>
-                        <h4>AI Threat Detection</h4>
-                        <p>Next-generation AI-powered threat prediction system</p>
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h4>Encrypt File</h4>
+                        <p>Secure your sensitive files with strong encryption</p>
                     </div>
                 </a>
             </div>
+            
+            <div class="col-md-3 mb-4" data-aos="fade-left">
+                <a href="{% url 'encrypt_file' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-unlock feature-icon"></i>
+                        <h4>Decrypt File</h4>
+                        <p>Safely decrypt your protected files when needed</p>
+                    </div>
+                </a>
+            </div>
+
         </div>
     </section>
 

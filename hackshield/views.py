@@ -5,10 +5,18 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 from django.http import JsonResponse, FileResponse
 from django.conf import settings
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
+from .utils.encryption import (
+    generate_file_key, load_file_key, encrypt_bytes, decrypt_bytes,
+    encrypt_stream, decrypt_stream, DecryptionError
+)
 import pandas as pd
 from scapy.all import sniff, conf
 from .models import Report
+import base64
+import secrets
+import logging
+
 
 # Directory Paths Configuration
 ENCRYPTED_DIR = getattr(settings, 'ENCRYPTED_DIR', 'media/encrypted/')
@@ -154,6 +162,21 @@ def analyze(request):
     
     return render(request, 'analyze.html')
 
+def delete_file(request):
+    if request.method == 'POST':
+        file_path = request.POST.get('file_path')
+        
+        # Security checks
+        if not validate_file_path(file_path):  # Implement proper validation
+            return JsonResponse({'status': 'error', 'message': 'Invalid file path'})
+            
+        try:
+            os.remove(file_path)
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+
+
 def scan_file(file_path):
     """Enhanced file scanning with multiple detection methods"""
     try:
@@ -215,25 +238,17 @@ def scan_file(file_path):
     except Exception as e:
         raise Exception(f"Scanning error: {str(e)}")
 
-def generate_key():
-    """Generate a new Fernet key"""
-    return Fernet.generate_key()
+# Configuration
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+SALT_SIZE = 16  # 128-bit salt
+ITERATIONS = 390000  # OWASP recommended iterations for PBKDF2-HMAC-SHA256
 
-def load_key(filename):
-    """Load or generate a key for a specific file"""
-    key_path = os.path.join(KEYS_DIR, f"{filename}.key")
-    
-    if os.path.exists(key_path):
-        with open(key_path, "rb") as key_file:
-            return key_file.read()
-    
-    key = generate_key()
-    with open(key_path, "wb") as key_file:
-        key_file.write(key)
-    return key
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def encrypt_file(request):
-    """File encryption view"""
+    """Handle file encryption"""
     if request.method == "POST" and request.FILES.get("file"):
         uploaded_file = request.FILES["file"]
         
@@ -242,50 +257,40 @@ def encrypt_file(request):
             if uploaded_file.size > MAX_FILE_SIZE:
                 raise ValueError("File size exceeds maximum limit of 100MB")
 
-            # Save original file temporarily
-            fs = FileSystemStorage(location=ENCRYPTED_DIR)
-            file_path = fs.save(uploaded_file.name, uploaded_file)
-            full_path = os.path.join(ENCRYPTED_DIR, file_path)
-
-            # Get or generate key
-            key = load_key(uploaded_file.name)
-            fernet = Fernet(key)
-
-            # Encrypt file
-            with open(full_path, "rb") as file:
-                encrypted_data = fernet.encrypt(file.read())
-
-            # Save encrypted file
+            # Generate and store encryption key
+            key = generate_file_key(uploaded_file.name)
+            
+            # Save encrypted file using streaming encryption
             encrypted_filename = f"encrypted_{uploaded_file.name}"
-            encrypted_path = os.path.join(ENCRYPTED_DIR, encrypted_filename)
+            encrypted_path = os.path.join(settings.ENCRYPTED_DIR, encrypted_filename)
             
             with open(encrypted_path, "wb") as enc_file:
-                enc_file.write(encrypted_data)
+                encrypt_stream(uploaded_file, enc_file, key)
 
-            # Clean up
-            os.remove(full_path)
+            logger.info(f"File encrypted successfully: {uploaded_file.name}")
 
             return JsonResponse({
                 "status": "success",
                 "message": "File encrypted successfully!",
                 "encrypted_file": encrypted_filename,
                 "download_url": f"/download_encrypted/{encrypted_filename}",
-                "key": key.decode()  # Note: In production, don't return the key!
+                "encryption_key": key.decode()  # Send key to user (in real app, use secure channel)
             })
 
         except Exception as e:
+            logger.error(f"Encryption failed: {str(e)}")
             return JsonResponse({
                 "status": "error",
-                "message": str(e)
+                "message": f"Encryption failed: {str(e)}"
             }, status=500)
 
     return render(request, "encrypt.html")
 
 def decrypt_file(request):
-    """File decryption view"""
+    """Handle file decryption"""
     if request.method == "POST":
         encrypted_file = request.FILES.get("encrypted_file")
-        user_key = request.POST.get("key")
+        encryption_key = request.POST.get("encryption_key")
 
         if not encrypted_file:
             return JsonResponse({
@@ -293,42 +298,87 @@ def decrypt_file(request):
                 "message": "No file provided"
             }, status=400)
 
-        if not user_key:
-            return JsonResponse({
-                "status": "error",
-                "message": "Encryption key is required"
-            }, status=400)
-
+        # Get original filename for key lookup if needed
+        original_filename = encrypted_file.name.replace('encrypted_', '')
+        decrypted_filename = f"decrypted_{original_filename}"
+        decrypted_path = os.path.join(settings.DECRYPTED_DIR, decrypted_filename)
+        
+        # Get key from POST or load from file
+        key_bytes = None
         try:
-            # Save encrypted file temporarily
-            fs = FileSystemStorage(location=DECRYPTED_DIR)
-            file_path = fs.save(f"temp_{encrypted_file.name}", encrypted_file)
-            full_path = os.path.join(DECRYPTED_DIR, file_path)
-
-            # Decrypt file
-            fernet = Fernet(user_key.encode())
+            if encryption_key:
+                key_bytes = encryption_key.encode()
+            else:
+                # Try to load key from storage if not provided
+                try:
+                    key_bytes = load_file_key(original_filename)
+                    logger.info(f"Using stored key for {original_filename}")
+                except FileNotFoundError:
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "Encryption key is required and no stored key was found"
+                    }, status=400)
             
-            with open(full_path, "rb") as file:
-                decrypted_data = fernet.decrypt(file.read())
-
-            # Save decrypted file
-            decrypted_filename = f"decrypted_{encrypted_file.name.replace('encrypted_', '')}"
-            decrypted_path = os.path.join(DECRYPTED_DIR, decrypted_filename)
-            
+            # Decrypt file using streaming decryption
             with open(decrypted_path, "wb") as dec_file:
-                dec_file.write(decrypted_data)
+                decrypt_stream(encrypted_file, dec_file, key_bytes)
 
-            # Clean up
-            os.remove(full_path)
+            logger.info(f"File decrypted successfully: {original_filename}")
 
             return JsonResponse({
                 "status": "success",
                 "message": "File decrypted successfully!",
                 "decrypted_file": decrypted_filename,
-                "download_url": f"/download_decrypted/{decrypted_filename}"
+                "download_url": f"/download_decrypted/{decrypted_filename}",
+                "original_filename": original_filename
             })
 
+        except DecryptionError as e:
+            logger.warning(f"Decryption failed - {str(e)}")
+            
+            # Fallback to legacy decryption if streaming fails
+            try:
+                logger.info("Attempting fallback to non-streaming decryption")
+                # Reset file pointer
+                encrypted_file.seek(0)
+                
+                # Read entire file
+                encrypted_content = b''
+                for chunk in encrypted_file.chunks():
+                    encrypted_content += chunk
+                
+                # Decrypt using non-streaming method
+                decrypted_data = decrypt_bytes(encrypted_content, key_bytes)
+                
+                # Save decrypted file
+                with open(decrypted_path, "wb") as dec_file:
+                    dec_file.write(decrypted_data)
+                
+                logger.info(f"File decrypted successfully using fallback method: {original_filename}")
+                
+                return JsonResponse({
+                    "status": "success",
+                    "message": "File decrypted successfully (using legacy method)!",
+                    "decrypted_file": decrypted_filename,
+                    "download_url": f"/download_decrypted/{decrypted_filename}",
+                    "original_filename": original_filename
+                })
+                
+            except (InvalidToken, DecryptionError):
+                logger.warning("Decryption failed - invalid encryption key")
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Decryption failed - invalid encryption key or corrupted file"
+                }, status=400)
+                
+        except InvalidToken:
+            logger.warning("Decryption failed - invalid encryption key")
+            return JsonResponse({
+                "status": "error",
+                "message": "Decryption failed - invalid encryption key"
+            }, status=400)
         except Exception as e:
+            logger.error(f"Decryption failed: {str(e)}")
             return JsonResponse({
                 "status": "error",
                 "message": f"Decryption failed: {str(e)}"
@@ -338,19 +388,25 @@ def decrypt_file(request):
 
 def download_encrypted(request, filename):
     """Serve encrypted file for download"""
-    file_path = os.path.join(ENCRYPTED_DIR, filename)
+    file_path = os.path.join(settings.ENCRYPTED_DIR, filename)
     if os.path.exists(file_path):
-        return FileResponse(open(file_path, 'rb'), as_attachment=True)
+        response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        response['Content-Length'] = os.path.getsize(file_path)
+        return response
     return JsonResponse({"error": "File not found"}, status=404)
 
 def download_decrypted(request, filename):
     """Serve decrypted file for download"""
-    file_path = os.path.join(DECRYPTED_DIR, filename)
+    file_path = os.path.join(settings.DECRYPTED_DIR, filename)
     if os.path.exists(file_path):
         response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+        response['Content-Length'] = os.path.getsize(file_path)
+        
+        # Optional: Delete after download for security
+        # os.remove(file_path)
+        
         return response
     return JsonResponse({"error": "File not found"}, status=404)
-
 def view_reports(request):
     """View all scan reports"""
     reports = Report.objects.all().order_by('-scan_date')

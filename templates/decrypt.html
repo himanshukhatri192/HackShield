@@ -1,5 +1,54 @@
-<form method="post">
+<form id="decryptForm" action="{% url 'decrypt_file' %}" method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <textarea name="encrypted_data" placeholder="Paste encrypted data"></textarea>
-    <button type="submit">Decrypt</button>
+    <input type="file" name="encrypted_file" required>
+    <input type="text" name="encryption_key" placeholder="Encryption Key" required>
+    <button type="submit">Decrypt File</button>
 </form>
+<div id="result"></div>
+
+<script>
+    const decryptForm = document.getElementById('decryptForm');
+    const resultDiv = document.getElementById('result');
+
+    decryptForm.addEventListener('submit', async e => {
+        e.preventDefault();
+        
+        // Show loading state
+        resultDiv.innerHTML = '<p>Decrypting file...</p>';
+        
+        try {
+            const formData = new FormData(decryptForm);
+            const res = await fetch('{% url "decrypt_file" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const json = await res.json();
+            
+            if (json.status === 'success') {
+                resultDiv.innerHTML = `
+                    <div class="success-message">
+                        <p>${json.message}</p>
+                        <p>Original filename: <strong>${json.original_filename}</strong></p>
+                        <p><a href="${json.download_url}" class="download-btn">Download Decrypted File</a></p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error-message">
+                        <p>Error: ${json.message}</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <div class="error-message">
+                    <p>An error occurred during decryption: ${error.message}</p>
+                </div>
+            `;
+        }
+    });
+</script>

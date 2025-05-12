@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HackShield - Cybersecurity Solution</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1a1a2e, #16213e);
+            --accent-color: #00ff88;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background: var(--primary-gradient);
+            color: white;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+        }
+
+        .cyber-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cyber-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Improved accessibility for stat cards */
+        .stat-card {
+            background: linear-gradient(45deg, var(--accent-color), #00b4d8);
+            color: #1a1a2e;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+            transform: rotate(45deg);
+        }
+
+        /* Chatbot improvements */
+        .chatbot-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--accent-color);
+            color: #1a1a2e;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border: none;
+        }
+
+        .chatbot-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            backdrop-filter: blur(12px);
+            display: none;
+            z-index: 999;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Enhanced animations */
+        @keyframes text-glow {
+            0% { text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+            50% { text-shadow: 0 0 20px rgba(0, 255, 136, 0.7); }
+            100% { text-shadow: 0 0 10px rgba(0, 255, 136, 0.3); }
+        }
+
+        .glow-text {
+            animation: text-glow 2s ease-in-out infinite;
+        }
+
+        /* Improved chat messages */
+        .chat-message {
+            max-width: 80%;
+            padding: 10px 15px;
+            margin: 8px;
+            border-radius: 15px;
+        }
+
+        .user-message {
+            background: rgba(0, 255, 136, 0.1);
+            margin-left: auto;
+        }
+
+        .bot-message {
+            background: rgba(255, 255, 255, 0.1);
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="container text-center py-5">
+        <h1 class="display-4 glow-text" data-aos="fade-down" aria-label="HackShield">
+            <i class="fas fa-shield-alt" aria-hidden="true"></i> HackShield
+        </h1>
+        <p class="lead" data-aos="fade-up">Advanced Cybersecurity Protection Suite</p>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="container py-4" aria-label="Statistics">
+        <div class="row text-center">
+            <div class="col-md-3" data-aos="zoom-in">
+                <div class="stat-card">
+                    <h3 aria-label="1 Million Plus">1M+</h3>
+                    <p>Malware Detected</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-card">
+                    <h3>99.9%</h3>
+                    <p>Detection Rate</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-card">
+                    <h3>24/7</h3>
+                    <p>Threat Monitoring</p>
+                </div>
+            </div>
+            <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-card">
+                    <h3>AI-Powered</h3>
+                    <p>Protection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <main class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-3" data-aos="fade-right">
+                <a href="{% url 'analyze' %}" class="text-decoration-none text-white" aria-label="File Analysis">
+                    <article class="cyber-card p-4 text-center h-100">
+                        <i class="fas fa-file-shield feature-icon" aria-hidden="true"></i>
+                        <h4 class="glow-text">File Analysis</h4>
+                        <p>Advanced malware detection using heuristic analysis and machine learning</p>
+                    </article>
+                </a>
+            </div>
+            <div class="col-md-3 mb-4" data-aos="fade-up">
+                <a href="{% url 'network' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-network-wired feature-icon"></i>
+                        <h4>Network Protection</h4>
+                        <p>Real-time network monitoring and intrusion detection system</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-4" data-aos="fade-up">
+                <a href="{% url 'encrypt_file' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h4>Encrypt File</h4>
+                        <p>Secure your sensitive files with strong encryption</p>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="col-md-3 mb-4" data-aos="fade-left">
+                <a href="{% url 'encrypt_file' %}" class="text-decoration-none text-white">
+                    <div class="cyber-card p-4 text-center">
+                        <i class="fas fa-unlock feature-icon"></i>
+                        <h4>Decrypt File</h4>
+                        <p>Safely decrypt your protected files when needed</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chatbot -->
+    <button class="chatbot-btn" onclick="toggleChat()" aria-label="Open chat">
+        <i class="fas fa-robot fa-2x" aria-hidden="true"></i>
+    </button>
+    <section class="chat-window" id="chatWindow" role="dialog" aria-label="Chat window">
+        <header class="card-header bg-dark">CyberSec Assistant</header>
+        <div class="card-body" id="chatBody" style="height: 300px; overflow-y: auto;"></div>
+        <footer class="card-footer">
+            <input type="text" class="form-control" id="userInput" 
+                   placeholder="Ask about cybersecurity..." aria-label="Chat input">
+        </footer>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+            mirror: false
+        });
+
+        // Enhanced chatbot functionality
+        let chatVisible = false;
+        const chatWindow = document.getElementById('chatWindow');
+        
+        function toggleChat() {
+            chatVisible = !chatVisible;
+            chatWindow.style.display = chatVisible ? 'block' : 'none';
+            if(chatVisible) document.getElementById('userInput').focus();
+        }
+
+        async function handleUserInput() {
+            const userInput = $('#userInput').val().trim();
+            if(!userInput) return;
+
+            const chatBody = $('#chatBody');
+            chatBody.append(`
+                <div class="chat-message user-message" aria-label="Your message">
+                    <strong>You:</strong> ${userInput}
+                </div>
+            `);
+            
+            $('#userInput').val('');
+            
+            // Add typing indicator
+            const typingIndicator = $(`
+                <div class="chat-message bot-message" aria-label="Bot typing">
+                    <span class="typing-dots">
+                        <span>.</span><span>.</span><span>.</span>
+                    </span>
+                </div>
+            `);
+            chatBody.append(typingIndicator);
+            chatBody.scrollTop(chatBody[0].scrollHeight);
+
+            // Simulated delay for response
+            setTimeout(() => {
+                typingIndicator.remove();
+                const answer = getBotResponse(userInput);
+                chatBody.append(`
+                    <div class="chat-message bot-message" aria-label="Bot response">
+                        <strong>Bot:</strong> ${answer}
+                    </div>
+                `);
+                chatBody.scrollTop(chatBody[0].scrollHeight);
+            }, 1500);
+        }
+
+        function getBotResponse(input) {
+            const responses = {
+                "hi": "Hello! I'm your cybersecurity assistant. How can I help?",
+                "phishing": "Phishing attacks use fake communications to trick victims. Always verify sender addresses and never click suspicious links!",
+                "malware": "Malware includes viruses, worms, and ransomware. Keep your software updated and use reputable antivirus software!",
+                "password": "Use strong passwords with a mix of characters. Consider using a password manager and enable 2FA whenever possible!",
+                "default": "I'm here to help with cybersecurity questions. Ask about threats, prevention, or best practices!"
+            };
+
+            const cleanInput = input.toLowerCase().replace(/[^a-z]/gi, '');
+            return responses[cleanInput] || responses['default'];
+        }
+
+        // Enhanced stats animation
+        $('.stat-card h3').each(function() {
+            const target = $(this);
+            if(!isNaN(target.text())) {
+                $({countNum: 0}).animate({countNum: target.text()}, {
+                    duration: 2000,
+                    easing: 'swing',
+                    step: function() {
+                        target.text(Math.ceil(this.countNum));
+                    }
+                });
+            }
+        });
+
+        // Close chat when clicking outside
+        document.addEventListener('click', (e) => {
+            if(chatVisible && !chatWindow.contains(e.target) {
+                toggleChat();
+            }
+        });
+    </script>
+</body>
+</html>

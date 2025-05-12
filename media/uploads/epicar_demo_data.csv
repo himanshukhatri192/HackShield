@@ -1,0 +1,6 @@
+patient_id,symptom,diagnosis,admission_date,discharge_date,hospital
+1,fever,flu,2025-04-10,2025-04-12,City Hospital
+2,cough,cold,2025-04-11,2025-04-13,Green Valley Clinic
+3,headache,migraine,2025-04-12,2025-04-14,Metro Hospital
+4,nausea,food poisoning,2025-04-13,2025-04-15,Downtown Health Center
+5,fatigue,anemia,2025-04-14,2025-04-16,Westside Hospital
