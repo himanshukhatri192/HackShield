@@ -103,3 +103,8 @@ firebase/
 *.key
 requirements_temp.txt
 
+# Screenshots and temporary images
+Screenshot*.png
+Screenshot*.jpg
+*.screenshot.*
+
