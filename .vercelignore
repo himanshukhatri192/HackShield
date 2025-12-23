@@ -1,0 +1,11 @@
+.git/
+venv/
+db.sqlite3
+media/
+uploads/
+decrypted_files/
+encrypted_files/
+__pycache__/
+.pytest_cache/
+*.pyc
+

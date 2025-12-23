@@ -52,25 +52,27 @@ os.makedirs(UPLOADS_DIR, exist_ok=True)
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+l%s79o8qd3xp1)=-x7!4q@+sg73$ws__6nn@_rpn)!s01mo1*'
+# Allow override via env for deployments (e.g., Vercel)
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-+l%s79o8qd3xp1)=-x7!4q@+sg73$ws__6nn@_rpn)!s01mo1*",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-# settings.py
 CSRF_TRUSTED_ORIGINS = [
-    'https://9022-122-161-69-37.ngrok-free.app',  # Your Ngrok URL
-    'https://*.ngrok-free.app',  # Wildcard for all Ngrok URLs (optional)
+    "https://*.ngrok-free.app",
+    "https://*.vercel.app",
+    "https://9022-122-161-69-37.ngrok-free.app",
 ]
 
-
-
-# settings.py
 ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '9022-122-161-69-37.ngrok-free.app',  # Add your Ngrok URL here
-    '*'  # Wildcard (temporary, for testing)
+    "localhost",
+    "127.0.0.1",
+    ".vercel.app",
+    "9022-122-161-69-37.ngrok-free.app",
+    "*",
 ]
 # Application definition
 
@@ -88,6 +90,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,6 +155,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
